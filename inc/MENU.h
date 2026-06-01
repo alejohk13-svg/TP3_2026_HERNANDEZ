@@ -1,7 +1,18 @@
-#ifndef MENU_H_
-#define MENU_H_
+#ifndef __MENU_H
+#define __MENU_H
 
-void Menu_Init(void);
-void Menu_Mostrar(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "stdint.h"
+
+void MENU_Init(void);
+
+void MENU_MostrarOpciones(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
