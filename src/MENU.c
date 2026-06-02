@@ -4,6 +4,12 @@
 #define TOTAL_OPCIONES  5
 #define LINEAS_DISPLAY  4
 
+typedef enum {
+    PANTALLA_PRINCIPAL,
+    PANTALLA_TECLA
+} modo_pantalla_t;
+
+static modo_pantalla_t modo_actual = PANTALLA_PRINCIPAL;
 static uint8_t opcion_seleccionada = 0;
 static uint8_t ventana_inicio = 0;
 
@@ -18,6 +24,7 @@ static const char *opciones_menu[TOTAL_OPCIONES] = {
 void MENU_Init(void)
 {
     LCD_clrscr();
+    modo_actual = PANTALLA_PRINCIPAL;
     MENU_MostrarOpciones();
 }
 
@@ -29,7 +36,6 @@ void MENU_MostrarOpciones(void)
     for (i = 0; i < LINEAS_DISPLAY; i++)
     {
         indice_opcion = ventana_inicio + i;
-
         LCD_gotoxy(0, i);
 
         if (indice_opcion == opcion_seleccionada)
@@ -47,32 +53,57 @@ void MENU_MostrarOpciones(void)
 
 void MENU_ProcesarTeclado(char tecla)
 {
-    if (tecla == 'A')
+    if (modo_actual == PANTALLA_PRINCIPAL)
     {
-        if (opcion_seleccionada > 0)
+        if (tecla == 'A')
         {
-            opcion_seleccionada--;
-
-            if (opcion_seleccionada < ventana_inicio)
+            if (opcion_seleccionada > 0)
             {
-                ventana_inicio = opcion_seleccionada;
+                opcion_seleccionada--;
+                if (opcion_seleccionada < ventana_inicio)
+                {
+                    ventana_inicio = opcion_seleccionada;
+                }
+                LCD_clrscr();
+                MENU_MostrarOpciones();
             }
-
-            MENU_MostrarOpciones();
+        }
+        else if (tecla == 'B')
+        {
+            if (opcion_seleccionada < (TOTAL_OPCIONES - 1))
+            {
+                opcion_seleccionada++;
+                if (opcion_seleccionada >= (ventana_inicio + LINEAS_DISPLAY))
+                {
+                    ventana_inicio++;
+                }
+                LCD_clrscr();
+                MENU_MostrarOpciones();
+            }
+        }
+        else if (tecla == 'C')
+        {
+            if (opcion_seleccionada == 0)
+            {
+                modo_actual = PANTALLA_TECLA;
+                LCD_clrscr();
+                LCD_WriteString(0, 0, "Tecla: --");
+            }
         }
     }
-    else if (tecla == 'B')
+    else if (modo_actual == PANTALLA_TECLA)
     {
-        if (opcion_seleccionada < (TOTAL_OPCIONES - 1))
+        if (tecla == 'D')
         {
-            opcion_seleccionada++;
-
-            if (opcion_seleccionada >= (ventana_inicio + LINEAS_DISPLAY))
-            {
-                ventana_inicio++;
-            }
-
+            modo_actual = PANTALLA_PRINCIPAL;
+            LCD_clrscr();
             MENU_MostrarOpciones();
+        }
+        else
+        {
+            LCD_gotoxy(7, 0);
+            LCD_putc(tecla);
+            LCD_putc(' ');
         }
     }
 }

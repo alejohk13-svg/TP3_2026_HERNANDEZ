@@ -5,10 +5,7 @@
 extern "C" {
 #endif
 
-#include "stdint.h"
-
 void MENU_Init(void);
-
 void MENU_MostrarOpciones(void);
 void MENU_ProcesarTeclado(char tecla);
 
