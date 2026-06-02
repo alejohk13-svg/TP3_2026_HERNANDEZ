@@ -11,7 +11,9 @@ typedef enum {
     PANTALLA_PRINCIPAL,
     PANTALLA_TECLA,
     PANTALLA_BACKLIGHT,
-    PANTALLA_CONTADOR
+    PANTALLA_CONTADOR,
+    PANTALLA_ALUMNO,
+    PANTALLA_MATERIA
 } modo_pantalla_t;
 
 static modo_pantalla_t modo_actual = PANTALLA_PRINCIPAL;
@@ -170,6 +172,20 @@ void MENU_ProcesarTeclado(char tecla)
                 modo_actual = PANTALLA_CONTADOR;
                 LCD_clrscr();
                 MENU_ActualizarContador(segundos_actuales);
+            }
+            else if (opcion_seleccionada == 3)
+            {
+                modo_actual = PANTALLA_ALUMNO;
+                LCD_clrscr();
+                LCD_WriteString(0, 0, "Alejo Demian");
+                LCD_WriteString(0, 1, "Hernandez Krotter");
+            }
+            else if (opcion_seleccionada == 4)
+            {
+                modo_actual = PANTALLA_MATERIA;
+                LCD_clrscr();
+                LCD_WriteString(0, 0, "Ing.A.Laiuppa");
+                LCD_WriteString(0, 1, "Tec.Digitales 2");
             }
         }
     }
