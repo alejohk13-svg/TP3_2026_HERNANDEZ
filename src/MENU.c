@@ -2,6 +2,7 @@
 #include "LCD.h"
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_rcc.h"
+#include "stdio.h"
 
 #define TOTAL_OPCIONES  5
 #define LINEAS_DISPLAY  4
@@ -9,13 +10,15 @@
 typedef enum {
     PANTALLA_PRINCIPAL,
     PANTALLA_TECLA,
-    PANTALLA_BACKLIGHT
+    PANTALLA_BACKLIGHT,
+    PANTALLA_CONTADOR
 } modo_pantalla_t;
 
 static modo_pantalla_t modo_actual = PANTALLA_PRINCIPAL;
 static uint8_t opcion_seleccionada = 0;
 static uint8_t ventana_inicio = 0;
 static uint8_t backlight_encendido = 1;
+static uint32_t segundos_actuales = 0;
 
 static const char *opciones_menu[TOTAL_OPCIONES] = {
     "1.Tecla Presionada ",
@@ -69,6 +72,18 @@ void MENU_MostrarOpciones(void)
     }
 }
 
+void MENU_ActualizarContador(uint32_t seg)
+{
+    segundos_actuales = seg;
+
+    if (modo_actual == PANTALLA_CONTADOR)
+    {
+        char buffer[20];
+        sprintf(buffer, "Contador: %lu s", segundos_actuales);
+        LCD_WriteString(0, 0, buffer);
+    }
+}
+
 void MENU_ProcesarTeclado(char tecla)
 {
     if (tecla == '#')
@@ -78,6 +93,7 @@ void MENU_ProcesarTeclado(char tecla)
         if (modo_actual == PANTALLA_BACKLIGHT)
         {
             LCD_WriteString(11, 0, "ON ");
+            return;
         }
     }
     else if (tecla == '*')
@@ -87,7 +103,16 @@ void MENU_ProcesarTeclado(char tecla)
         if (modo_actual == PANTALLA_BACKLIGHT)
         {
             LCD_WriteString(11, 0, "OFF");
+            return;
         }
+    }
+
+    if (tecla == 'D' && modo_actual != PANTALLA_PRINCIPAL)
+    {
+        modo_actual = PANTALLA_PRINCIPAL;
+        LCD_clrscr();
+        MENU_MostrarOpciones();
+        return;
     }
 
     if (modo_actual == PANTALLA_PRINCIPAL)
@@ -140,30 +165,21 @@ void MENU_ProcesarTeclado(char tecla)
                     LCD_WriteString(11, 0, "OFF");
                 }
             }
+            else if (opcion_seleccionada == 2)
+            {
+                modo_actual = PANTALLA_CONTADOR;
+                LCD_clrscr();
+                MENU_ActualizarContador(segundos_actuales);
+            }
         }
     }
     else if (modo_actual == PANTALLA_TECLA)
     {
-        if (tecla == 'D')
-        {
-            modo_actual = PANTALLA_PRINCIPAL;
-            LCD_clrscr();
-            MENU_MostrarOpciones();
-        }
-        else if (tecla != '#' && tecla != '*')
+        if (tecla != '#' && tecla != '*')
         {
             LCD_gotoxy(7, 0);
             LCD_putc(tecla);
             LCD_putc(' ');
-        }
-    }
-    else if (modo_actual == PANTALLA_BACKLIGHT)
-    {
-        if (tecla == 'D')
-        {
-            modo_actual = PANTALLA_PRINCIPAL;
-            LCD_clrscr();
-            MENU_MostrarOpciones();
         }
     }
 }
