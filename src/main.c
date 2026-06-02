@@ -1,7 +1,7 @@
 #include "stm32f4xx.h"
-#include "LCD.h"
-#include "MENU.h"
-#include "teclado.h"
+#include "../LCD/LCD.h"
+#include "../Menu/MENU.h"
+#include "../Teclado/TECLADO.h"
 
 volatile uint32_t msTicks = 0;
 

@@ -1,8 +1,8 @@
 #include "MENU.h"
-#include "LCD.h"
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_rcc.h"
 #include "stdio.h"
+#include "../LCD/LCD.h"
 
 #define TOTAL_OPCIONES  5
 #define LINEAS_DISPLAY  4
