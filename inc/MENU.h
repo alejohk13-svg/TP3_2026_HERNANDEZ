@@ -10,6 +10,7 @@ extern "C" {
 void MENU_Init(void);
 
 void MENU_MostrarOpciones(void);
+void MENU_ProcesarTeclado(char tecla);
 
 #ifdef __cplusplus
 }

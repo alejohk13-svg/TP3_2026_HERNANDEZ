@@ -1,7 +1,11 @@
-#ifndef TECLADO_H_
-#define TECLADO_H_
+#ifndef TECLADO_H
+#define TECLADO_H
 
-void Teclado_Init(void);
-char Teclado_Leer(void);
+#include "stm32f4xx.h"
+
+void teclado_init(void);
+void teclado_update(void);
+char teclado_getKey(void);
+int teclado_presionado(void);
 
 #endif
