@@ -106,9 +106,7 @@ void LCD_puts(char *s);
 void LCD_create_custom_char(uint8_t location, uint8_t* data_bytes);
 void LCD_put_custom_char(uint8_t x, uint8_t y, uint8_t location);
 void LCD_WriteString(uint8_t x, uint8_t y, char *Texto);
-void delay_ms(uint32_t ms);
-// Mapeamos los microsegundos a un delay simple por software para los pulsos cortos
-#define delay_us(us) for(volatile int i = 0; i < (us * 20); i++)
+
 #ifdef __cplusplus
 }
 #endif

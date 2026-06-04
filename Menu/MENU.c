@@ -3,6 +3,8 @@
 #include "stm32f4xx_rcc.h"
 #include "stdio.h"
 #include "../LCD/LCD.h"
+#include "../Teclado/TECLADO.h"
+#include "global.h"
 
 #define TOTAL_OPCIONES  5
 #define LINEAS_DISPLAY  4
@@ -16,11 +18,13 @@ typedef enum {
     PANTALLA_MATERIA
 } modo_pantalla_t;
 
+
 static modo_pantalla_t modo_actual = PANTALLA_PRINCIPAL;
 static uint8_t opcion_seleccionada = 0;
 static uint8_t ventana_inicio = 0;
 static uint8_t backlight_encendido = 1;
-static uint32_t segundos_actuales = 0;
+static uint32_t localSystickContador = 0;
+static uint32_t last_tick_teclado = 0;
 
 static const char *opciones_menu[TOTAL_OPCIONES] = {
     "1.Tecla Presionada ",
@@ -48,6 +52,8 @@ void MENU_Init(void)
 
     LCD_clrscr();
     modo_actual = PANTALLA_PRINCIPAL;
+    localSystickContador = 0;
+    last_tick_teclado = 0;
     MENU_MostrarOpciones();
 }
 
@@ -74,20 +80,16 @@ void MENU_MostrarOpciones(void)
     }
 }
 
-void MENU_ActualizarContador(uint32_t seg)
+void MENU_Update(char tecla)
 {
-    segundos_actuales = seg;
+    char buffer[20];
 
-    if (modo_actual == PANTALLA_CONTADOR)
+    if ((getSystick() - last_tick_teclado) >= 1)
     {
-        char buffer[20];
-        sprintf(buffer, "Contador: %lu s", segundos_actuales);
-        LCD_WriteString(0, 0, buffer);
+        last_tick_teclado = getSystick();
+        teclado_update();
     }
-}
 
-void MENU_ProcesarTeclado(char tecla)
-{
     if (tecla == '#')
     {
         backlight_encendido = 1;
@@ -95,7 +97,6 @@ void MENU_ProcesarTeclado(char tecla)
         if (modo_actual == PANTALLA_BACKLIGHT)
         {
             LCD_WriteString(11, 0, "ON ");
-            return;
         }
     }
     else if (tecla == '*')
@@ -105,7 +106,6 @@ void MENU_ProcesarTeclado(char tecla)
         if (modo_actual == PANTALLA_BACKLIGHT)
         {
             LCD_WriteString(11, 0, "OFF");
-            return;
         }
     }
 
@@ -117,85 +117,107 @@ void MENU_ProcesarTeclado(char tecla)
         return;
     }
 
-    if (modo_actual == PANTALLA_PRINCIPAL)
+    switch (modo_actual)
     {
-        if (tecla == 'A')
-        {
-            if (opcion_seleccionada > 0)
+        case PANTALLA_PRINCIPAL:
+            if (tecla == 'A')
             {
-                opcion_seleccionada--;
-                if (opcion_seleccionada < ventana_inicio)
+                if (opcion_seleccionada > 0)
                 {
-                    ventana_inicio = opcion_seleccionada;
-                }
-                LCD_clrscr();
-                MENU_MostrarOpciones();
-            }
-        }
-        else if (tecla == 'B')
-        {
-            if (opcion_seleccionada < (TOTAL_OPCIONES - 1))
-            {
-                opcion_seleccionada++;
-                if (opcion_seleccionada >= (ventana_inicio + LINEAS_DISPLAY))
-                {
-                    ventana_inicio++;
-                }
-                LCD_clrscr();
-                MENU_MostrarOpciones();
-            }
-        }
-        else if (tecla == 'C')
-        {
-            if (opcion_seleccionada == 0)
-            {
-                modo_actual = PANTALLA_TECLA;
-                LCD_clrscr();
-                LCD_WriteString(0, 0, "Tecla: --");
-            }
-            else if (opcion_seleccionada == 1)
-            {
-                modo_actual = PANTALLA_BACKLIGHT;
-                LCD_clrscr();
-                LCD_WriteString(0, 0, "Backlight: ");
-                if (backlight_encendido)
-                {
-                    LCD_WriteString(11, 0, "ON ");
-                }
-                else
-                {
-                    LCD_WriteString(11, 0, "OFF");
+                    opcion_seleccionada--;
+                    if (opcion_seleccionada < ventana_inicio)
+                    {
+                        ventana_inicio = opcion_seleccionada;
+                    }
+                    LCD_clrscr();
+                    MENU_MostrarOpciones();
                 }
             }
-            else if (opcion_seleccionada == 2)
+            else if (tecla == 'B')
             {
-                modo_actual = PANTALLA_CONTADOR;
-                LCD_clrscr();
-                MENU_ActualizarContador(segundos_actuales);
+                if (opcion_seleccionada < (TOTAL_OPCIONES - 1))
+                {
+                    opcion_seleccionada++;
+                    if (opcion_seleccionada >= (ventana_inicio + LINEAS_DISPLAY))
+                    {
+                        ventana_inicio++;
+                    }
+                    LCD_clrscr();
+                    MENU_MostrarOpciones();
+                }
             }
-            else if (opcion_seleccionada == 3)
+            else if (tecla == 'C')
             {
-                modo_actual = PANTALLA_ALUMNO;
-                LCD_clrscr();
-                LCD_WriteString(0, 0, "Alejo Demian");
-                LCD_WriteString(0, 1, "Hernandez Krotter");
+                switch (opcion_seleccionada)
+                {
+                    case 0:
+                        modo_actual = PANTALLA_TECLA;
+                        LCD_clrscr();
+                        LCD_WriteString(0, 0, "Tecla: --");
+                        break;
+                    case 1:
+                        modo_actual = PANTALLA_BACKLIGHT;
+                        LCD_clrscr();
+                        LCD_WriteString(0, 0, "Backlight: ");
+                        if (backlight_encendido)
+                        {
+                            LCD_WriteString(11, 0, "ON ");
+                        }
+                        else
+                        {
+                            LCD_WriteString(11, 0, "OFF");
+                        }
+                        break;
+                    case 2:
+                        modo_actual = PANTALLA_CONTADOR;
+                        LCD_clrscr();
+                        localSystickContador = getSystick();
+                        sprintf(buffer, "Contador: %lu s", getSeconds());
+                        LCD_WriteString(0, 0, buffer);
+                        break;
+                    case 3:
+                        modo_actual = PANTALLA_ALUMNO;
+                        LCD_clrscr();
+                        LCD_WriteString(0, 0, "Alejo Demian");
+                        LCD_WriteString(0, 1, "Hernandez Krotter");
+                        break;
+                    case 4:
+                        modo_actual = PANTALLA_MATERIA;
+                        LCD_clrscr();
+                        LCD_WriteString(0, 0, "Ing.A.Laiuppa");
+                        LCD_WriteString(0, 1, "Tec.Digitales 2");
+                        break;
+                    default:
+                        break;
+                }
             }
-            else if (opcion_seleccionada == 4)
+            break;
+
+        case PANTALLA_TECLA:
+            if (tecla != 0 && tecla != '#' && tecla != '*' && tecla != 'D')
             {
-                modo_actual = PANTALLA_MATERIA;
-                LCD_clrscr();
-                LCD_WriteString(0, 0, "Ing.A.Laiuppa");
-                LCD_WriteString(0, 1, "Tec.Digitales 2");
+                LCD_gotoxy(7, 0);
+                LCD_putc(tecla);
+                LCD_putc(' ');
             }
-        }
-    }
-    else if (modo_actual == PANTALLA_TECLA)
-    {
-        if (tecla != '#' && tecla != '*')
-        {
-            LCD_gotoxy(7, 0);
-            LCD_putc(tecla);
-            LCD_putc(' ');
-        }
+            break;
+
+        case PANTALLA_CONTADOR:
+            if ((getSystick() - localSystickContador) >= 1000)
+            {
+                localSystickContador = getSystick();
+                sprintf(buffer, "Contador: %lu s", getSeconds());
+                LCD_WriteString(0, 0, buffer);
+            }
+            break;
+
+        case PANTALLA_BACKLIGHT:
+        case PANTALLA_ALUMNO:
+        case PANTALLA_MATERIA:
+            break;
+
+        default:
+            modo_actual = PANTALLA_PRINCIPAL;
+            break;
     }
 }

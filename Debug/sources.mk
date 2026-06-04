@@ -15,6 +15,7 @@ C_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
+GLOBAL \
 LCD \
 Menu \
 StdPeriph_Driver/src \

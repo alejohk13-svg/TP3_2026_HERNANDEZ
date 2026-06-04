@@ -14,6 +14,7 @@ RM := rm -rf
 -include StdPeriph_Driver/src/subdir.mk
 -include Menu/subdir.mk
 -include LCD/subdir.mk
+-include GLOBAL/subdir.mk
 -include subdir.mk
 -include objects.mk
 
@@ -31,13 +32,13 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: TP3_2026_HERNANDEZ.elf
+all: TP3_2026_Hernandez.elf
 
 # Tool invocations
-TP3_2026_HERNANDEZ.elf: $(OBJS) $(USER_OBJS) C:\Users\alejo\OneDrive\Desktop\UTN\Tecnicas\ Digitales\ II\Laboratorios\TP3_2026_HERNANDEZ/LinkerScript.ld
+TP3_2026_Hernandez.elf: $(OBJS) $(USER_OBJS) C:\Users\alejo\OneDrive\Desktop\UTN\Tecnicas\ Digitales\ II\Laboratorios\TP3_2026_Hernandez/LinkerScript.ld
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU GCC Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T"C:/Users/alejo/OneDrive/Desktop/UTN/Tecnicas Digitales II/Laboratorios/TP3_2026_HERNANDEZ/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "TP3_2026_HERNANDEZ.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T"C:/Users/alejo/OneDrive/Desktop/UTN/Tecnicas Digitales II/Laboratorios/TP3_2026_Hernandez/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "TP3_2026_Hernandez.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build
@@ -49,8 +50,8 @@ clean:
 
 post-build:
 	-@echo 'Generating binary and Printing size information:'
-	arm-none-eabi-objcopy -O binary "TP3_2026_HERNANDEZ.elf" "TP3_2026_HERNANDEZ.bin"
-	arm-none-eabi-size "TP3_2026_HERNANDEZ.elf"
+	arm-none-eabi-objcopy -O binary "TP3_2026_Hernandez.elf" "TP3_2026_Hernandez.bin"
+	arm-none-eabi-size "TP3_2026_Hernandez.elf"
 	-@echo ' '
 
 .PHONY: all clean dependents

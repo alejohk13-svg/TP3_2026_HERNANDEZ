@@ -10,10 +10,11 @@
 /** Includes ---------------------------------------------------------------- */
 #include <LCD.h>
 #include "stm32f4xx.h"
+#include "global.h"
 
 /** Local Defines: Port and pin definition for 4-bit mode ---------------------------------- */
 
-#define	USE_RW				1			// 1: Se utiliza R/W (conectado a PE2)
+#define	USE_RW				1
 
 //--------- CONTROL PINs (RS, RW, EN) ------------
 #define LCD_RCC_GPIO_CONTROL   (RCC_AHB1Periph_GPIOE)

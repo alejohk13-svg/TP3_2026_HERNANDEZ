@@ -9,8 +9,7 @@ extern "C" {
 
 void MENU_Init(void);
 void MENU_MostrarOpciones(void);
-void MENU_ProcesarTeclado(char tecla);
-void MENU_ActualizarContador(uint32_t seg);
+void MENU_Update(char tecla);
 
 #ifdef __cplusplus
 }
