@@ -18,7 +18,6 @@ typedef enum {
     PANTALLA_MATERIA
 } modo_pantalla_t;
 
-
 static modo_pantalla_t modo_actual = PANTALLA_PRINCIPAL;
 static uint8_t opcion_seleccionada = 0;
 static uint8_t ventana_inicio = 0;
@@ -84,12 +83,6 @@ void MENU_Update(char tecla)
 {
     char buffer[20];
 
-    if ((getSystick() - last_tick_teclado) >= 1)
-    {
-        last_tick_teclado = getSystick();
-        teclado_update();
-    }
-
     if (tecla == '#')
     {
         backlight_encendido = 1;
@@ -98,6 +91,7 @@ void MENU_Update(char tecla)
         {
             LCD_WriteString(11, 0, "ON ");
         }
+        return;
     }
     else if (tecla == '*')
     {
@@ -107,6 +101,7 @@ void MENU_Update(char tecla)
         {
             LCD_WriteString(11, 0, "OFF");
         }
+        return;
     }
 
     if (tecla == 'D' && modo_actual != PANTALLA_PRINCIPAL)
@@ -194,7 +189,7 @@ void MENU_Update(char tecla)
             break;
 
         case PANTALLA_TECLA:
-            if (tecla != 0 && tecla != '#' && tecla != '*' && tecla != 'D')
+            if (tecla != 0)
             {
                 LCD_gotoxy(7, 0);
                 LCD_putc(tecla);

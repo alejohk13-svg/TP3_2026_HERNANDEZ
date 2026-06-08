@@ -16,7 +16,8 @@ int main(void)
 
     while (1)
     {
-        char tecla_actual = teclado_getKey();
+        teclado_task();
+        char tecla_actual = teclado_getc();
         MENU_Update(tecla_actual);
     }
 }

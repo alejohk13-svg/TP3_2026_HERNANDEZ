@@ -1,6 +1,8 @@
 #include "teclado.h"
 #include "stm32f4xx_gpio.h"
-#include "stm32f4xx_rcc.h" // Agregado para asegurar el manejo de relojes
+#include "stm32f4xx_rcc.h"
+
+extern uint32_t getSystick(void);
 
 typedef struct
 {
@@ -53,12 +55,10 @@ void teclado_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct;
 
-    // Encender relojes de los tres puertos involucrados (A, C y E)
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
-    // Configurar FILAS en Puerto E como Salidas Open-Drain con Pull-Up
     GPIO_InitStruct.GPIO_Pin = filas[0].pin | filas[1].pin | filas[2].pin | filas[3].pin;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_OD;
@@ -66,13 +66,11 @@ void teclado_init(void)
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-    // Configurar COLUMNAS 0, 1 y 2 en Puerto C como Entradas con Pull-Up
     GPIO_InitStruct.GPIO_Pin = columns[0].pin | columns[1].pin | columns[2].pin;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-    // CORRECCIÓN: Configurar COLUMNA 3 en Puerto A (PA0) aplicando los cambios correctamente
     GPIO_InitStruct.GPIO_Pin = columns[3].pin;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
@@ -199,4 +197,20 @@ char teclado_getKey(void)
 int teclado_presionado(void)
 {
     return (escanear_teclado() != 0);
+}
+
+static uint32_t last_tick_teclado_interno = 0;
+
+void teclado_task(void)
+{
+    if ((getSystick() - last_tick_teclado_interno) >= 1)
+    {
+        last_tick_teclado_interno = getSystick();
+        teclado_update();
+    }
+}
+
+char teclado_getc(void)
+{
+    return teclado_getKey();
 }
